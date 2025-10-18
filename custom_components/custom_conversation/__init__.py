@@ -119,10 +119,11 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
         )
         return False
 
-    if config_entry.version < CONFIG_VERSION:
-        new_data = {**config_entry.data}
-        new_options = {**config_entry.options}
+    new_data = {**config_entry.data}
+    new_options = {**config_entry.options}
 
+    if config_entry.version == 1:
+        # Migrate from version 1 to 2
         new_data[CONF_PRIMARY_PROVIDER] = DEFAULT_PROVIDER
         new_data[CONF_PRIMARY_API_KEY] = new_data.pop(CONF_API_KEY)
 
@@ -136,6 +137,28 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
         new_options[CONF_TEMPERATURE] = llm_params.get(CONF_TEMPERATURE)
         new_options[CONF_TOP_P] = llm_params.get(CONF_TOP_P)
         new_options[CONF_MAX_TOKENS] = llm_params.get(CONF_MAX_TOKENS)
+        LOGGER.info("Migrated configuration from version 1 to 2")
+
+    if config_entry.version <= 2:
+        # Migrate from version 2 to 3: Convert CONF_LLM_HASS_API from string to list
+        from homeassistant.const import CONF_LLM_HASS_API
+
+        llm_api = new_options.get(CONF_LLM_HASS_API)
+        if isinstance(llm_api, str):
+            if llm_api == "none" or not llm_api:
+                new_options[CONF_LLM_HASS_API] = []
+            else:
+                new_options[CONF_LLM_HASS_API] = [llm_api]
+            LOGGER.info(
+                "Migrated CONF_LLM_HASS_API from '%s' to %s",
+                llm_api,
+                new_options[CONF_LLM_HASS_API]
+            )
+        elif llm_api is None:
+            new_options[CONF_LLM_HASS_API] = []
+        LOGGER.info("Migrated configuration from version 2 to 3")
+
+    if config_entry.version < CONFIG_VERSION:
         hass.config_entries.async_update_entry(
             config_entry,
             data=new_data,

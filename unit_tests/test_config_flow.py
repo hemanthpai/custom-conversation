@@ -207,7 +207,7 @@ async def test_options_flow(hass: HomeAssistant, config_entry: MockConfigEntry):
         result = await hass.config_entries.options.async_configure(
             result["flow_id"],
             user_input={
-                CONF_LLM_HASS_API: "none",
+                CONF_LLM_HASS_API: [],
                 CONF_IGNORED_INTENTS_SECTION: {
                     CONF_IGNORED_INTENTS: ["HassGetState"],
                 },
@@ -240,7 +240,7 @@ async def test_options_flow(hass: HomeAssistant, config_entry: MockConfigEntry):
             },
         )
         assert result["type"] == FlowResultType.CREATE_ENTRY
-        assert CONF_LLM_HASS_API not in result["data"]
+        assert result["data"][CONF_LLM_HASS_API] == []
         assert "agents" in result["data"]
         assert result["data"][CONF_IGNORED_INTENTS_SECTION][CONF_IGNORED_INTENTS] == ["HassGetState"]
         assert result["data"][CONF_AGENTS_SECTION][CONF_ENABLE_HASS_AGENT] is True
@@ -283,7 +283,7 @@ async def test_options_flow_empty_fields_reset(hass: HomeAssistant, config_entry
         result = await hass.config_entries.options.async_configure(
             result["flow_id"],
             user_input={
-                CONF_LLM_HASS_API: "none",
+                CONF_LLM_HASS_API: [],
                 CONF_IGNORED_INTENTS_SECTION: {
                     CONF_IGNORED_INTENTS: [],
                 },
@@ -317,7 +317,7 @@ async def test_options_flow_empty_fields_reset(hass: HomeAssistant, config_entry
             },
         )
         assert result["type"] == FlowResultType.CREATE_ENTRY
-        assert CONF_LLM_HASS_API not in result["data"]
+        assert result["data"][CONF_LLM_HASS_API] == []
         assert "agents" in result["data"]
         assert result["data"][CONF_IGNORED_INTENTS_SECTION][CONF_IGNORED_INTENTS] == llm.AssistAPI.IGNORE_INTENTS
         assert result["data"][CONF_AGENTS_SECTION][CONF_ENABLE_HASS_AGENT] is True

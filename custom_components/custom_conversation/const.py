@@ -5,7 +5,7 @@ import logging
 DOMAIN = "custom_conversation"
 LOGGER = logging.getLogger(__package__)
 
-CONFIG_VERSION = 2
+CONFIG_VERSION = 3
 
 CONF_PRIMARY_PROVIDER = "primary_provider"
 CONF_PRIMARY_API_KEY = "primary_api_key"

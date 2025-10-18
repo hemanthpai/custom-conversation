@@ -1,12 +1,15 @@
 # Custom Conversation for Home Assistant
 
-A highly configurable conversation agent for Home Assistant, designed for users who want fine-grained control over their LLM interactions. 
-While Home Assistant's built-in conversation component works well for most users, this project provides additional customization options 
+> **🔄 Fork Notice**: This is a fork of [michelle-avery/custom-conversation](https://github.com/michelle-avery/custom-conversation) with **multi-tool support** added. You can now select multiple APIs simultaneously (e.g., Assist + MCP servers) instead of being limited to a single tool, matching the functionality of the Ollama integration.
+
+A highly configurable conversation agent for Home Assistant, designed for users who want fine-grained control over their LLM interactions.
+While Home Assistant's built-in conversation component works well for most users, this project provides additional customization options
 and experimentation features for those who want to dive deeper into LLM integration.
 
 ## Features
 
 ### Core Features
+- **Multi-Tool Support** ⭐ - Select multiple APIs simultaneously (Assist + MCP servers) for combined tool access
 - Compatible with multiple LLM providers, via LiteLLM. See [Supported Providers](docs/supported-providers.md) for the list of supported providers.
 - Configurable LLM Fallback providers - you can use a free low-quota provider as your primary LLM, and fall back to a paid provider (or another free one) if you exceed
 the quota of the first one.
@@ -57,13 +60,14 @@ learn how to tweak all of the settings.
 The component can be configured through Home Assistant's UI. Configuration is divided into several sections:
 
 ### Basic Settings
-- **Instructions Prompt**: This is the same prompt you can customize in Home Assistant's built-in OpenAI Conversation component. 
+- **Instructions Prompt**: This is the same prompt you can customize in Home Assistant's built-in OpenAI Conversation component.
 It's sent with each conversation sent to the LLM, along with any prompt parts added by the API, and a basic prompt Home Assistant adds, which contains the current
 date and time.
-- **API Choice**: Choose which API to expose to the LLM.
-  - **No control**: The LLM can answer basic questions about the world, but will have no ability to control your home
+- **API Selection**: Choose which APIs to expose to the LLM. ⭐ **You can now select multiple APIs** to combine tools from different sources:
   - **Assist**: Uses Home Assistant's built-in LLM API support to expose Intents, Intent Scripts, and Custom Sentences
   - **Custom Conversation LLM API**: Use this component's own LLM API, allowing more control over the API's prompts, exposed intents, etc.
+  - **MCP Servers**: If you have MCP (Model Context Protocol) servers configured, they will appear here and can be selected alongside other APIs
+  - **No selection**: The LLM can answer basic questions about the world, but will have no ability to control your home
 
 
 ### Ignored Intents

@@ -83,7 +83,7 @@ from .providers import SUPPORTED_PROVIDERS, LiteLLMProvider, get_provider
 _LOGGER = LOGGER
 
 DEFAULT_OPTIONS = {
-    CONF_LLM_HASS_API: "none",
+    CONF_LLM_HASS_API: [],
     CONF_AGENTS_SECTION: {
         CONF_ENABLE_HASS_AGENT: True,
         CONF_ENABLE_LLM_AGENT: True,
@@ -505,9 +505,9 @@ class CustomConversationOptionsFlow(OptionsFlow):
             # Process user input before saving
             processed_input = {**user_input}  # Start with a copy
 
-            # Handle potential "none" value for Hass API control
-            if processed_input.get(CONF_LLM_HASS_API) == "none":
-                processed_input.pop(CONF_LLM_HASS_API, None)  # Remove if 'none'
+            # Handle empty API list - ensure it's always a list
+            if not processed_input.get(CONF_LLM_HASS_API):
+                processed_input[CONF_LLM_HASS_API] = []
 
             # Handle empty ignored intents - use default
             ignored_intents_section = processed_input.get(
@@ -556,8 +556,9 @@ class CustomConversationOptionsFlow(OptionsFlow):
                 vol.Optional(
                     CONF_LLM_HASS_API,
                     description={"suggested_value": options.get(CONF_LLM_HASS_API)},
-                    default="none",
-                ): SelectSelector(SelectSelectorConfig(options=hass_apis)),
+                ): SelectSelector(
+                    SelectSelectorConfig(options=hass_apis, multiple=True)
+                ),
                 # Agent Section
                 vol.Required(CONF_AGENTS_SECTION): section(
                     vol.Schema(
@@ -757,14 +758,10 @@ class CustomConversationOptionsFlow(OptionsFlow):
 
     def _get_hass_apis(self, hass: HomeAssistant) -> list[SelectOptionDict]:
         """Get available Home Assistant LLM APIs."""
-        hass_apis: list[SelectOptionDict] = [
-            SelectOptionDict(label="No control", value="none")
-        ]
-        hass_apis.extend(
+        return [
             SelectOptionDict(label=api.name, value=api.id)
             for api in llm.async_get_apis(hass)
-        )
-        return hass_apis
+        ]
 
     async def _get_intents(self, hass: HomeAssistant) -> list[SelectOptionDict]:
         """Get available intents."""

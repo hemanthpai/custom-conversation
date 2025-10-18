@@ -577,16 +577,17 @@ class CustomConversationEntity(
 
         try:
             LOGGER.debug("Updating LLM Data")
-            llm_api = self.entry.options.get(CONF_LLM_HASS_API)
-            if llm_api == "none":
-                llm_api = None
+            llm_apis = self.entry.options.get(CONF_LLM_HASS_API, [])
+            # Ensure it's a list for backward compatibility
+            if isinstance(llm_apis, str):
+                llm_apis = [llm_apis] if llm_apis and llm_apis != "none" else []
             prompt_object = await async_update_llm_data(
                 self.hass,
                 user_input,
                 self.entry,
                 chat_log,
                 self.prompt_manager,
-                llm_api,
+                llm_apis,
             )
             if prompt_object:
                 LOGGER.debug(
