@@ -272,3 +272,218 @@ This component is particularly useful for:
 assistants
 
 For detailed implementation examples of specific use cases, see the [use-cases directory](./docs/use-cases/README.md).
+
+## Multi-Tool Configuration Examples
+
+One of the key features of this fork is **multi-tool support**, allowing you to combine different APIs for enhanced functionality.
+
+### Example 1: Assist + Custom Conversation API
+**Use Case**: Combine Home Assistant's built-in intents with custom prompts
+
+1. Navigate to **Settings** → **Devices & Services** → **Custom Conversation**
+2. Click **Configure** on your integration instance
+3. In the **API Selection** dropdown, select **both**:
+   - ✅ Assist
+   - ✅ Custom Conversation LLM API
+4. Click **Submit**
+
+**Result**: The LLM now has access to all Assist intents (turn on/off, timers, weather, etc.) plus any custom intents you've configured, all with your custom prompt engineering.
+
+### Example 2: Multiple MCP Servers
+**Use Case**: Combine tools from multiple MCP servers for comprehensive automation
+
+1. First, install and configure your MCP servers (via the MCP integration)
+2. Go to **Custom Conversation** → **Configure**
+3. In the **API Selection**, select:
+   - ✅ Assist
+   - ✅ MCP Server: Home Automation Tools
+   - ✅ MCP Server: Calendar Integration
+   - ✅ MCP Server: Weather Data
+4. Click **Submit**
+
+**Result**: Your assistant can now control devices, manage calendar events, and query weather data—all in a single conversation.
+
+### Example 3: Testing with No Tools
+**Use Case**: Test your LLM configuration without home control
+
+1. Go to **Custom Conversation** → **Configure**
+2. **Deselect all APIs** (leave the selection empty)
+3. Click **Submit**
+
+**Result**: The LLM will respond to general questions but won't have access to any home automation tools. Perfect for testing prompts and API connectivity.
+
+### Example 4: Gradual Feature Rollout
+**Use Case**: Start simple and add complexity incrementally
+
+**Step 1 - Basic Setup**: Select only **Assist**
+- Test basic home control commands
+- Verify device control works
+
+**Step 2 - Add Custom API**: Add **Custom Conversation LLM API**
+- Test custom prompts
+- Configure ignored intents
+
+**Step 3 - Add MCP**: Add your first **MCP Server**
+- Verify tool combination works
+- Monitor for conflicts
+
+**Step 4 - Full Integration**: Add remaining MCP servers
+- Fine-tune prompt handling
+- Optimize for your workflow
+
+### Tips for Multi-Tool Success
+
+1. **Start Small**: Begin with 1-2 APIs and add more gradually
+2. **Monitor Logs**: Check Home Assistant logs for any tool conflicts
+3. **Test Incrementally**: After adding each API, test basic functionality
+4. **Document Your Setup**: Keep notes on which tools do what
+5. **Use Ignored Intents**: If tools overlap, use the "Ignored Intents" feature to prevent conflicts
+
+## Troubleshooting
+
+### Installation Issues
+
+#### Integration Not Found in HACS
+**Problem**: Can't find "Custom Conversation" in HACS
+
+**Solution**:
+1. Ensure you've added this repository as a custom repository in HACS
+2. Use the one-click button in the Installation section above, or
+3. Manually add: `https://github.com/hemanthpai/custom-conversation` as a custom repository
+4. Restart Home Assistant and refresh HACS
+
+#### Integration Won't Load
+**Problem**: Integration fails to load after installation
+
+**Solution**:
+1. Check Home Assistant logs: **Settings** → **System** → **Logs**
+2. Look for errors containing `custom_conversation`
+3. Common causes:
+   - Missing dependencies: Restart Home Assistant to trigger dependency installation
+   - Conflicting integration: Disable the official OpenAI Conversation integration
+   - Old Home Assistant version: Requires HA 2025.1.0 or newer
+
+### Configuration Issues
+
+#### API Key Invalid
+**Problem**: "Invalid authentication" error during setup
+
+**Solution**:
+1. Verify your API key is correct (no extra spaces)
+2. Check the API key has the correct permissions for your provider
+3. For OpenAI: Ensure the key starts with `sk-`
+4. For Gemini: Verify the key is from Google AI Studio
+5. Test the API key using the provider's official API documentation
+
+#### No Models Available
+**Problem**: Model dropdown is empty or shows an error
+
+**Solution**:
+1. Check your internet connection
+2. Verify the base URL is correct for your provider:
+   - OpenAI: `https://api.openai.com/v1`
+   - Custom: Check your provider's documentation
+3. Ensure your API key has access to the models
+4. Try entering a model name manually if the provider is unsupported
+
+#### Can't Select Multiple APIs
+**Problem**: Only able to select one API at a time
+
+**Solution**:
+1. Make sure you're using version 1.3.0 or later (check `manifest.json`)
+2. Clear browser cache and refresh the page
+3. Try using a different browser
+4. Update to the latest version of this integration
+
+### Runtime Issues
+
+#### LLM Not Responding
+**Problem**: Assistant doesn't respond or times out
+
+**Solution**:
+1. Check Home Assistant logs for error messages
+2. Verify your LLM provider's API status
+3. Test with a simpler prompt
+4. Check your max_tokens setting (increase if responses are cut off)
+5. Verify network connectivity to the LLM provider
+
+#### Tools Not Working
+**Problem**: LLM can't control devices despite API being selected
+
+**Solution**:
+1. Verify devices are **exposed to the assistant**:
+   - Go to **Settings** → **Voice Assistants** → **Expose**
+   - Ensure your devices are checked
+2. Check that at least one API is selected (Assist or Custom Conversation LLM API)
+3. Review "Ignored Intents" to ensure needed intents aren't blocked
+4. Enable the **LLM Agent** in the Agents section
+5. Check logs for tool call errors
+
+#### Multiple Tools Conflicting
+**Problem**: Tools from different APIs are interfering with each other
+
+**Solution**:
+1. Use the **Ignored Intents** feature to disable overlapping intents
+2. Review logs to identify which tools are conflicting
+3. Consider using only the APIs you actually need
+4. Test each API individually to isolate the issue
+
+#### High API Costs
+**Problem**: Unexpected API usage or costs
+
+**Solution**:
+1. Set a lower **max_tokens** value (e.g., 150 instead of 500)
+2. Use the **fallback provider** feature to use a cheaper model as primary
+3. Enable only the **Home Assistant Agent** for simple requests
+4. Monitor usage in your LLM provider's dashboard
+5. Consider using a local LLM with a compatible endpoint
+
+### Multi-Tool Specific Issues
+
+#### MCP Server Not Appearing
+**Problem**: Configured MCP server doesn't show in API selection
+
+**Solution**:
+1. Verify the MCP integration is installed and configured
+2. Restart Home Assistant after installing MCP servers
+3. Check MCP server logs for errors
+4. Ensure MCP server is running and accessible
+
+#### Prompts Not Combining Correctly
+**Problem**: Multiple API prompts seem to interfere
+
+**Solution**:
+1. Check logs for prompt combination warnings
+2. Simplify your base prompt when using multiple APIs
+3. Use Custom Conversation LLM API for full control over prompt composition
+4. Review the combined prompt in debug logs
+
+### Getting Help
+
+If you're still experiencing issues:
+
+1. **Check the Logs**: Most issues show helpful error messages in Home Assistant logs
+2. **Search Existing Issues**: Check the [issue tracker](https://github.com/hemanthpai/custom-conversation/issues)
+3. **Create a New Issue**: Include:
+   - Home Assistant version
+   - Integration version
+   - Steps to reproduce
+   - Relevant log entries
+   - Configuration (remove API keys!)
+4. **Community Forum**: Ask in the Home Assistant Community forums
+
+### Debug Mode
+
+To enable detailed logging for troubleshooting:
+
+1. Add to your `configuration.yaml`:
+```yaml
+logger:
+  default: info
+  logs:
+    custom_components.custom_conversation: debug
+```
+
+2. Restart Home Assistant
+3. Check logs: **Settings** → **System** → **Logs**
+4. Look for `custom_components.custom_conversation` entries
