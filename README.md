@@ -28,10 +28,10 @@ the quota of the first one.
 
 ### With HACS
 * Install [HACS](https://hacs.xyz/docs/use/) if you have not already
-* Click 
+* Click
 [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.
 ](https://my.home-assistant.io/badges/hacs_repository.svg)
-](https://my.home-assistant.io/redirect/hacs_repository/?owner=michelle-avery&category=integration&repository=custom-conversation)  
+](https://my.home-assistant.io/redirect/hacs_repository/?owner=hemanthpai&category=integration&repository=custom-conversation)
 to add this as a custom repository, or add it manually.
 * Click "Add" to confirm, and then click "Download" to download and install the integration
 * Restart Home Assistant
