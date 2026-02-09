@@ -87,10 +87,11 @@ async def async_update_llm_data(
                 all_tools.extend(llm_api.tools)
 
                 # Collect API prompts
-                if isinstance(llm_api.api_prompt, tuple):
-                    _, prompt_text = llm_api.api_prompt
+                api_prompt = await llm_api.api_prompt
+                if isinstance(api_prompt, tuple):
+                    _, prompt_text = api_prompt
                 else:
-                    prompt_text = llm_api.api_prompt
+                    prompt_text = api_prompt
                 api_prompts.append(prompt_text)
 
             except HomeAssistantError as err:
