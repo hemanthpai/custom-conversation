@@ -120,7 +120,7 @@ class PromptManager:
         if config_entry and config_entry.options.get(CONF_LANGFUSE_SECTION, {}).get(
             CONF_ENABLE_LANGFUSE
         ):
-            prompt_object, langfuse_prompt = await self._get_langfuse_prompt(
+            langfuse_result = await self._get_langfuse_prompt(
                 config_entry.options.get(CONF_LANGFUSE_SECTION, {}).get(
                     CONF_LANGFUSE_BASE_PROMPT_ID
                 ),
@@ -131,8 +131,10 @@ class PromptManager:
                     "user_name": context.user_name,
                 },
             )
-            if langfuse_prompt:
-                return prompt_object, langfuse_prompt
+            if langfuse_result is not None:
+                prompt_object, langfuse_prompt = langfuse_result
+                if langfuse_prompt:
+                    return prompt_object, langfuse_prompt
 
         try:
             base_prompt = self._get_prompt_config(
@@ -165,7 +167,7 @@ class PromptManager:
         if config_entry and config_entry.options.get(CONF_LANGFUSE_SECTION, {}).get(
             CONF_ENABLE_LANGFUSE
         ):
-            prompt_object, langfuse_prompt = await self._get_langfuse_prompt(
+            langfuse_result = await self._get_langfuse_prompt(
                 config_entry.options.get(CONF_LANGFUSE_SECTION, {}).get(
                     CONF_LANGFUSE_API_PROMPT_ID
                 ),
@@ -189,8 +191,10 @@ class PromptManager:
                     ),
                 },
             )
-            if langfuse_prompt:
-                return prompt_object, langfuse_prompt
+            if langfuse_result is not None:
+                prompt_object, langfuse_prompt = langfuse_result
+                if langfuse_prompt:
+                    return prompt_object, langfuse_prompt
         prompt_parts = []
 
         if not context.exposed_entities:
@@ -369,8 +373,14 @@ class LangfuseClient:
                     prompt_id, label=self.prompts[prompt_id], type="chat"
                 )
             )
-            # Compile the prompt in an executor
-            compiled_prompt = prompt_object.compile(**variables)[0]["content"]
+            # Compile the prompt - handle both chat and text prompt types
+            compiled = prompt_object.compile(**variables)
+            if isinstance(compiled, str):
+                # TextPromptClient returns a plain string
+                compiled_prompt = compiled
+            else:
+                # ChatPromptClient returns List[ChatMessageDict]
+                compiled_prompt = compiled[0]["content"]
         except Exception as err:
             LOGGER.error("Error getting Langfuse prompt: %s", err)
             raise LangfusePromptError(f"Failed to get Langfuse prompt: {err}") from err
