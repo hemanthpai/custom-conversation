@@ -1,4 +1,6 @@
 """Replaces Some of Home Assistant's helpers/llm.py code to allow us to choose the correct prompt."""
+import inspect
+
 from langfuse.decorators import langfuse_context, observe
 
 from homeassistant.components.conversation import (
@@ -86,8 +88,11 @@ async def async_update_llm_data(
                 api_instances.append(llm_api)
                 all_tools.extend(llm_api.tools)
 
-                # Collect API prompts
-                api_prompt = await llm_api.api_prompt
+                # Collect API prompts - api_prompt may be a coroutine
+                # (external HA APIs) or an already-resolved value (CustomLLMAPI)
+                api_prompt = llm_api.api_prompt
+                if inspect.isawaitable(api_prompt):
+                    api_prompt = await api_prompt
                 if isinstance(api_prompt, tuple):
                     _, prompt_text = api_prompt
                 else:
@@ -121,7 +126,9 @@ async def async_update_llm_data(
         if has_custom_api and len(api_instances) == 1:
             # Single CustomLLMAPI - use its prompt directly
             llm_api = api_instances[0]
-            prompt = await llm_api.api_prompt
+            prompt = llm_api.api_prompt
+            if inspect.isawaitable(prompt):
+                prompt = await prompt
             if isinstance(prompt, tuple):
                 LOGGER.debug("Retrieved Langfuse Prompt")
                 prompt_object, prompt = prompt
